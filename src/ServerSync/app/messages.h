@@ -18,7 +18,7 @@
 #define _MESSAGES_H_
 
 #include <sgx_ukey_exchange.h>
-#include <sgx_uae_service.h>
+#include <sgx_uae_epid.h>
 
 #include "ledger_keys.h"
 

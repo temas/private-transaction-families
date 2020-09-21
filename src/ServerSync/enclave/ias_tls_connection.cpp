@@ -53,7 +53,7 @@ extern "C" int sgxssl_sscanf(const char *str, const char *fmt, ...);
 extern char ias_ca_cert_buffer[];
 extern char attestation_ca_cert_buffer[];
 
-#define QUOTE_STRINGS_COUNT 8
+#define QUOTE_STRINGS_COUNT 10
 const char* quote_status_strings[QUOTE_STRINGS_COUNT] = {
 	"OK",
 	"SIGNATURE_INVALID",
@@ -62,7 +62,9 @@ const char* quote_status_strings[QUOTE_STRINGS_COUNT] = {
 	"KEY_REVOKED",
 	"SIGRL_VERSION_MISMATCH",
 	"GROUP_OUT_OF_DATE",
-	"CONFIGURATION_NEEDED"
+	"CONFIGURATION_NEEDED",
+	"SW_HARDENING_NEEDED",
+	"CONFIGURATION_AND_SW_HARDENING_NEEDED"
 };
 
 #define PSE_STRINGS_COUNT 6
@@ -318,8 +320,8 @@ static bool connect_to_ias(ias_session_t* p_ias_session)
 		if (res != 1)
 		{
 			PRINT(ERROR, IAS, "SSL_connect failed, ret %d, error %d, errno %d\n", res, SSL_get_error(ssl, res), errno);
-      unsigned long cur_err = ERR_get_error();
-      PRINT(ERROR, IAS, "Error details (%d): %s\n", cur_err, ERR_error_string(cur_err, NULL)); 
+      //unsigned long cur_err = ERR_get_error();
+      //PRINT(ERROR, IAS, "Error details (%d): %s\n", cur_err, ERR_error_string(cur_err, NULL)); 
 			break;
 		}
 		
@@ -1085,6 +1087,7 @@ static bool parse_ias_report(const char* report, const unsigned char* nonce_str,
 		cj_object = cJSON_GetObjectItem(cj_report, "platformInfoBlob");
 		if (cj_object != NULL)
 		{		
+			// We currently allow the SW_HARDENING_NEEDED flag if we are in debug mode
 			if (p_ias_report->status == IAS_QUOTE_OK)
 			{
 #ifdef VERIFY_PSE_ATTESTATION
