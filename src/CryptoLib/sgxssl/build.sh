@@ -11,27 +11,31 @@ OPENSSL_VERSION=`/bin/ls $PROJECT_ROOT/openssl*.tar.gz | /usr/bin/head -1 | /bin
 if [ "$OPENSSL_VERSION" == "" ] 
 then
 	echo "In order to run this script, OpenSSL tar.gz package must be located in the same directory as this build script"
-	echo "You can download it from https://www.openssl.org/source/, please download the latest 1.1.0 version"
+	echo "You can download it from https://www.openssl.org/source/, please download the latest 1.1.1 version"
 	exit 1
 fi
 echo "OpenSSL version is $OPENSSL_VERSION"
 
-if [[ "$OPENSSL_VERSION" != *"1.1.0"* ]]; then
-	echo "Currently only OpenSSL 1.1.0 is supported"
+if [[ "$OPENSSL_VERSION" != *"1.1.1"* ]]; then
+	echo "Currently only OpenSSL 1.1.1 is supported"
 	exit 1
 fi
 
+echo "*** Pulling intel-sgx-ssl from git"
 # get a fresh copy of sgx-ssl
 rm -rf intel-sgx-ssl
-git clone --branch openssl_1.1.0 https://github.com/intel/intel-sgx-ssl.git || exit 1
+git clone --branch lin_2.10_1.1.1g https://github.com/intel/intel-sgx-ssl.git || exit 1
 
+echo "*** Cleanup old builds"
 # cleanup old builds
 rm -rf $PROJECT_ROOT/lib64/*
 rm -rf $PROJECT_ROOT/include/*
 
+echo "*** Copy openssl to the build location"
 # put the openssl tarball in the right place for sgx-ssl build
 cp $PROJECT_ROOT/$OPENSSL_VERSION.tar.gz $PROJECT_ROOT/intel-sgx-ssl/openssl_source || exit 1
 
+echo "*** Copy our changed files"
 # copy changed files (adding tls support)
 cd revised_files || exit 1
 cp bypass_to_sgxssl.h $PROJECT_ROOT/intel-sgx-ssl/openssl_source/bypass_to_sgxssl.h || exit 1
@@ -41,12 +45,14 @@ cp tdirent.cpp $PROJECT_ROOT/intel-sgx-ssl/Linux/sgx/libsgx_tsgxssl/tdirent.cpp 
 cp tunistd.cpp $PROJECT_ROOT/intel-sgx-ssl/Linux/sgx/libsgx_tsgxssl/tunistd.cpp || exit 1
 cp uunistd.cpp $PROJECT_ROOT/intel-sgx-ssl/Linux/sgx/libsgx_usgxssl/uunistd.cpp || exit 1
 
+echo "*** Sed some memleaks aspects"
 # todo - need to solve the problem with CRYPTO_mem_leaks_fp - talk to Alaa
 sed -i "s|OPENSSL_NO_CRYPTO_MDEBUG|OPENSSL_NO_STDIO|g" $PROJECT_ROOT/intel-sgx-ssl/Linux/sgx/test_app/enclave/tests/dhtest.c
 sed -i "s|OPENSSL_NO_CRYPTO_MDEBUG|OPENSSL_NO_STDIO|g" $PROJECT_ROOT/intel-sgx-ssl/Linux/sgx/test_app/enclave/tests/ectest.c
 sed -i "s|OPENSSL_NO_CRYPTO_MDEBUG|OPENSSL_NO_STDIO|g" $PROJECT_ROOT/intel-sgx-ssl/Linux/sgx/test_app/enclave/tests/rsa_test.c
 sed -i "s|OPENSSL_NO_CRYPTO_MDEBUG|OPENSSL_NO_STDIO|g" $PROJECT_ROOT/intel-sgx-ssl/Linux/sgx/test_app/enclave/tests/ecdhtest.c
 
+echo "*** Start the build"
 # move into the build folder
 cd $PROJECT_ROOT/intel-sgx-ssl/Linux || exit 1
 
@@ -57,8 +63,8 @@ make clean
 
 # build sgx-ssl _debug_
 make all DEBUG=1 SGX_MODE=HW || exit 1
-mv $PROJECT_ROOT/intel-sgx-ssl/Linux/package/lib64/* $PROJECT_ROOT/lib64 || exit 1
-mv $PROJECT_ROOT/intel-sgx-ssl/Linux/package/include/* $PROJECT_ROOT/include || exit 1
+rsync -a $PROJECT_ROOT/intel-sgx-ssl/Linux/package/lib64/* $PROJECT_ROOT/lib64 || exit 1
+rsync -a $PROJECT_ROOT/intel-sgx-ssl/Linux/package/include/* $PROJECT_ROOT/include || exit 1
 
 # cleanup
 cd $PROJECT_ROOT || exit 1

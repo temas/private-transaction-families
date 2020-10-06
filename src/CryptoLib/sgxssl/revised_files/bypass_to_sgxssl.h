@@ -158,6 +158,7 @@
 /*time.h*/
 #define _time64        sgxssl__time64
 #define _gmtime64      sgxssl__gmtime64
+#define _gmtime64_s    sgxssl__gmtime64_s
 #define _localtime64   sgxssl__localtime64
 #define _getsystime    sgxssl_getsystime
 
@@ -229,6 +230,19 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define gmtime_r sgxssl_gmtime_r
 #define gettimeofday sgxssl_gettimeofday
 
+//openssl 1.1.1 new APIs
+//
+#define getpid sgxssl_getpid
+#define stat sgxssl_stat
+#define syscall sgxssl_syscall
+#define pthread_atfork sgxssl_pthread_atfork
+#define opendir sgxssl_opendir
+#define readdir sgxssl_readdir
+#define closedir sgxssl_closedir
+#define OPENSSL_issetugid sgxssl_OPENSSL_issetugid
+#define clock_gettime sgxssl_clock_gettime
+
+
 #define pthread_rwlock_init sgxssl_pthread_rwlock_init
 #define pthread_rwlock_rdlock sgxssl_pthread_rwlock_rdlock
 #define pthread_rwlock_wrlock sgxssl_pthread_rwlock_wrlock
@@ -251,6 +265,7 @@ char * sgxssl___builtin___strcpy_chk(char *dest, const char *src, unsigned int d
 #define setcontext sgxssl_setcontext
 #define makecontext sgxssl_makecontext
 #define getenv	sgxssl_getenv
+#define secure_getenv  sgxssl_getenv
 #define atexit sgxssl_atexit
 #define sscanf sgxssl_sscanf
 

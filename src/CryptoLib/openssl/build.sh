@@ -11,13 +11,13 @@ OPENSSL_VERSION=`/bin/ls $PROJECT_ROOT/*.tar.gz | /usr/bin/head -1 | /bin/grep -
 if [ "$OPENSSL_VERSION" == "" ] 
 then
 	echo "In order to run this script, OpenSSL tar.gz package must be located in the same directory as this build script"
-	echo "You can download it from https://www.openssl.org/source/, please download the latest 1.1.0 version"
+	echo "You can download it from https://www.openssl.org/source/, please download the latest 1.1.1 version"
 	exit 1
 fi
 echo "OpenSSL version is $OPENSSL_VERSION"
 
-if [[ "$OPENSSL_VERSION" != *"1.1.0"* ]]; then
-	echo "Currently only OpenSSL 1.1.0 is supported"
+if [[ "$OPENSSL_VERSION" != *"1.1.1"* ]]; then
+	echo "Currently only OpenSSL 1.1.1 is supported"
 	exit 1
 fi
 
@@ -34,7 +34,7 @@ cd $PROJECT_ROOT/$OPENSSL_VERSION || exit 1
 
 # prepare openssl _release_ configuration and build
 perl Configure linux-x86_64 no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-ssl3 no-md2 no-md4 no-ui -D_FORTIFY_SOURCE=2 --prefix=$PROJECT_ROOT/tmp_output
-make -j2 build_generated libcrypto.so libssl.a || exit 1
+make -j2 all libcrypto.a libssl.a || exit 1
 
 # copy the required libraries
 cp libcrypto.a $PROJECT_ROOT/lib/libcrypto.a || exit 1
@@ -51,7 +51,7 @@ cd $PROJECT_ROOT/$OPENSSL_VERSION || exit 1
 
 # prepare openssl _debug_ configuration and build
 perl Configure -g linux-x86_64 enable-crypto-mdebug no-idea no-mdc2 no-rc5 no-rc4 no-bf no-ec2m no-camellia no-cast no-srp no-hw no-dso no-ssl3 no-md2 no-md4 no-ui --prefix=$PROJECT_ROOT/tmp_output
-make -j2 build_generated libcrypto.so libssl.a || exit 1
+make -j2 all libcrypto.a libssl.a || exit 1
 
 # copy the required libraries
 cp libcrypto.a $PROJECT_ROOT/lib/libcryptod.a || exit 1
