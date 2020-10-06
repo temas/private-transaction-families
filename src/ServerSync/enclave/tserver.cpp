@@ -534,6 +534,12 @@ int enclave_msg3(const char* input_buffer, size_t input_size,
             msg4_status = MSG4_OK;
             PRINT(ERROR, SERVER, "attestation report status is GROUP_OUT_OF_DATE ignoring error in debug mode\n");
         }
+	// In debug mode we ignore hardening needed as an error
+	if (attestation_report.status == IAS_QUOTE_SW_HARDENING_NEEDED)
+	{
+		msg4_status = MSG4_OK;
+		PRINT(ERROR, SERVER, "attestation report status is SW_HARDENING_NEEDED ignoring issue in debug mode\n");
+	}
 #endif
 #ifdef VERIFY_PSE_ATTESTATION
         if (attestation_report.pse_status != IAS_PSE_OK)

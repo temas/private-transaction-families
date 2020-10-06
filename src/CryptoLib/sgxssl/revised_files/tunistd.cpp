@@ -146,5 +146,65 @@ long sgxssl_sysconf(int name)
 	return -1;
 }
 
+int sgxssl_getpid() {
+
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+    return 0;
+}
+
+//Don't use system calls inside enclave.
+//
+int sgxssl_OPENSSL_issetugid()
+{
+    return 1;
+}
+
+//ENOSYS indicates that Function not implemented.
+//
+long sgxssl_syscall (long number, ...) {
+    (void)(number);
+    
+    errno = ENOSYS;
+    return -1;
+}
+
+#if 0
+int sgxssl_stat(const char *path, struct stat *buf)
+{
+
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+    return -1;
+}
+
+struct dirent *sgxssl_readdir(void *dirp)
+{
+    FSTART;
+
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+    FEND;
+    return NULL;
+
+}
+
+int sgxssl_closedir(void *dirp)
+{
+    FSTART;
+
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+    FEND;
+    return -1;
+
+}
+
+void *sgxssl_opendir(const char *name)
+{
+    FSTART;
+
+    SGX_UNREACHABLE_CODE(SET_ERRNO);
+    FEND;
+    return NULL;
+}
+#endif
+
 
 } // extern "C"

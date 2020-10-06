@@ -10,6 +10,8 @@
  * https://www.openssl.org/source/license.html
  */
 
+#include <openssl/opensslv.h>
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -52,11 +54,11 @@ extern "C" {
 #ifndef OPENSSL_NO_SRP
 # define OPENSSL_NO_SRP
 #endif
-#ifndef OPENSSL_NO_UI
-# define OPENSSL_NO_UI
-#endif
 #ifndef OPENSSL_THREADS
 # define OPENSSL_THREADS
+#endif
+#ifndef OPENSSL_RAND_SEED_NONE
+# define OPENSSL_RAND_SEED_NONE
 #endif
 #ifndef OPENSSL_NO_AFALGENG
 # define OPENSSL_NO_AFALGENG
@@ -70,8 +72,17 @@ extern "C" {
 #ifndef OPENSSL_NO_CAPIENG
 # define OPENSSL_NO_CAPIENG
 #endif
+#ifndef OPENSSL_NO_CRYPTO_MDEBUG
+# define OPENSSL_NO_CRYPTO_MDEBUG
+#endif
 #ifndef OPENSSL_NO_CRYPTO_MDEBUG_BACKTRACE
 # define OPENSSL_NO_CRYPTO_MDEBUG_BACKTRACE
+#endif
+#ifndef OPENSSL_NO_DEVCRYPTOENG
+# define OPENSSL_NO_DEVCRYPTOENG
+#endif
+#ifndef OPENSSL_NO_DSO
+# define OPENSSL_NO_DSO
 #endif
 #ifndef OPENSSL_NO_EC2M
 # define OPENSSL_NO_EC2M
@@ -81,6 +92,9 @@ extern "C" {
 #endif
 #ifndef OPENSSL_NO_EGD
 # define OPENSSL_NO_EGD
+#endif
+#ifndef OPENSSL_NO_EXTERNAL_TESTS
+# define OPENSSL_NO_EXTERNAL_TESTS
 #endif
 #ifndef OPENSSL_NO_FUZZ_AFL
 # define OPENSSL_NO_FUZZ_AFL
@@ -118,14 +132,17 @@ extern "C" {
 #ifndef OPENSSL_NO_UBSAN
 # define OPENSSL_NO_UBSAN
 #endif
+#ifndef OPENSSL_NO_UI_CONSOLE
+# define OPENSSL_NO_UI_CONSOLE
+#endif
 #ifndef OPENSSL_NO_UNIT_TEST
 # define OPENSSL_NO_UNIT_TEST
 #endif
 #ifndef OPENSSL_NO_WEAK_SSL_CIPHERS
 # define OPENSSL_NO_WEAK_SSL_CIPHERS
 #endif
-#ifndef OPENSSL_NO_AFALGENG
-# define OPENSSL_NO_AFALGENG
+#ifndef OPENSSL_NO_DYNAMIC_ENGINE
+# define OPENSSL_NO_DYNAMIC_ENGINE
 #endif
 
 
@@ -142,15 +159,11 @@ extern "C" {
  * functions.
  */
 #ifndef DECLARE_DEPRECATED
-# if defined(OPENSSL_NO_DEPRECATED)
-#  define DECLARE_DEPRECATED(f)
-# else
-#  define DECLARE_DEPRECATED(f)   f;
-#  ifdef __GNUC__
-#   if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ > 0)
-#    undef DECLARE_DEPRECATED
-#    define DECLARE_DEPRECATED(f)    f __attribute__ ((deprecated));
-#   endif
+# define DECLARE_DEPRECATED(f)   f;
+# ifdef __GNUC__
+#  if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ > 0)
+#   undef DECLARE_DEPRECATED
+#   define DECLARE_DEPRECATED(f)    f __attribute__ ((deprecated));
 #  endif
 # endif
 #endif
@@ -174,6 +187,18 @@ extern "C" {
 # define OPENSSL_API_COMPAT OPENSSL_MIN_API
 #endif
 
+/*
+ * Do not deprecate things to be deprecated in version 1.2.0 before the
+ * OpenSSL version number matches.
+ */
+#if OPENSSL_VERSION_NUMBER < 0x10200000L
+# define DEPRECATEDIN_1_2_0(f)   f;
+#elif OPENSSL_API_COMPAT < 0x10200000L
+# define DEPRECATEDIN_1_2_0(f)   DECLARE_DEPRECATED(f)
+#else
+# define DEPRECATEDIN_1_2_0(f)
+#endif
+
 #if OPENSSL_API_COMPAT < 0x10100000L
 # define DEPRECATEDIN_1_1_0(f)   DECLARE_DEPRECATED(f)
 #else
@@ -191,8 +216,6 @@ extern "C" {
 #else
 # define DEPRECATEDIN_0_9_8(f)
 #endif
-
-#define OPENSSL_CPUID_OBJ
 
 /* Generate 80386 code? */
 #undef I386_ONLY
